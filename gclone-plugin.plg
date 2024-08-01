@@ -1,70 +1,57 @@
-<?xml version='1.0' standalone='yes'?>
-
+<?xml version="1.0" standalone="yes"?>
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "gclone-plugin">
 <!ENTITY author    "unbekannt1753">
 <!ENTITY version   "2023.08.01">
 <!ENTITY md5       "d5bb80c5d403252f70809976cbb5e9d4">
-<!ENTITY launch    "Settings/GclonePlugin">
+<!ENTITY launch    "Settings/GClonePlugin">
 <!ENTITY plugdir   "/usr/local/emhttp/plugins/&name;">
 <!ENTITY github    "unbekannt1753/gclone-unraid">
-<!ENTITY pluginURL "https://raw.githubusercontent.com/&github;/main/&name;.plg">
+<!ENTITY pluginURL "https://raw.githubusercontent.com/&github;/master/&name;.plg">
+<!ENTITY source    "/boot/config/plugins/&name;/&name;-&version;.txz">
+<!ENTITY packages  "/boot/config/plugins/&name;/packages">
 ]>
 
-<PLUGIN name="&name;"
-        author="&author;"
-        version="&version;"
-        launch="&launch;"
-        pluginURL="&pluginURL;"
-        min="6.9.0"
-        support="https://forums.unraid.net/topic/YOUR-SUPPORT-THREAD/">
+<PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" support="https://forums.unraid.net/topic/YOUR-SUPPORT-THREAD/">
 
 <CHANGES>
 ###2023.08.01
-- Initial release
+- Initial release of GClone plugin for Unraid
+###2023.08.02
+- Fixed installation issues
 </CHANGES>
 
-<!--
-The GClone plugin allows you to mount Google Drive using GClone.
-For more information, visit the GitHub repository: https://github.com/&github;
--->
-
-<FILE Name="/boot/config/plugins/&name;/&name;-&version;.txz" Run="upgradepkg --install-new">
-<URL>https://raw.githubusercontent.com/&github;/main/archive/&name;-&version;.txz</URL>
-<MD5>&md5;</MD5>
-</FILE>
-
-<FILE Name="/boot/config/plugins/&name;/&name;.png">
-<URL>https://raw.githubusercontent.com/&github;/main/&name;.png</URL>
-</FILE>
-
-<FILE Name="&plugdir;/&name;.png">
-<LOCAL>/boot/config/plugins/&name;/&name;.png</LOCAL>
-</FILE>
-
-<FILE Name="&plugdir;/gclone-plugin.page">
+<FILE Run="/bin/bash">
 <INLINE>
-<![CDATA[
-Menu="OtherSettings"
-Icon="gclone-plugin.png"
-Version="&version;"
-Author="&author;"
-Title="GClone Plugin"
----
-<?php
-include_once "/usr/local/emhttp/plugins/&name;/gclone-plugin-backend.php";
-?>
-]]>
+# Remove old 'source' files
+rm -f $(ls /boot/config/plugins/&name;/&name;*.txz 2>/dev/null | grep -v '&version;')
 </INLINE>
+</FILE>
+
+<FILE Name="&source;" Run="upgradepkg --install-new">
+<URL>https://raw.githubusercontent.com/&github;/master/archive/&name;-&version;.txz</URL>
+<MD5>&md5;</MD5>
 </FILE>
 
 <FILE Name="&plugdir;/README.md">
 <INLINE>
-**GClone Plugin for Unraid**
+**GClone Plugin**
 
-This plugin allows you to mount Google Drive using GClone.
+This plugin installs GClone for Unraid systems.
+GClone is a tool for mounting Google Drive and performing other cloud storage operations.
 
-For more information, visit the [GitHub repository](https://github.com/&github;).
+For more information, visit [https://github.com/&github;](https://github.com/&github;)
+</INLINE>
+</FILE>
+
+<FILE Run="/bin/bash">
+<INLINE>
+echo ""
+echo "----------------------------------------------------"
+echo " &name; has been installed."
+echo " Version: &version;"
+echo "----------------------------------------------------"
+echo ""
 </INLINE>
 </FILE>
 
