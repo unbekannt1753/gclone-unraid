@@ -2,12 +2,12 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name "gclone-plugin">
 <!ENTITY author "unbekannt1753">
-<!ENTITY version "2023.08.01">
+<!ENTITY version "2023.07.31">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/unbekannt1753/gclone-unraid/main/gclone-plugin.plg">
 ]>
 <PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;">
 <FILE Name="/boot/config/plugins/&name;/&name;-&version;.txz" Run="upgradepkg --install-new">
-<URL>https://raw.githubusercontent.com/unbekannt1753/gclone-unraid/main/archive/&name;-&version;.txz</URL>
+<URL>https://github.com/unbekannt1753/gclone-unraid/raw/main/&name;-&version;.txz</URL>
 <MD5>d5bb80c5d403252f70809976cbb5e9d4</MD5>
 </FILE>
 </PLUGIN>
