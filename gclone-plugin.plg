@@ -42,7 +42,7 @@ For more information, visit the GitHub repository: https://github.com/&github;
 <LOCAL>/boot/config/plugins/&name;/&name;.png</LOCAL>
 </FILE>
 
-<FILE Name="&plugdir;/GclonePlugin.page">
+<FILE Name="&plugdir;/gclone-plugin.page">
 <INLINE>
 <![CDATA[
 Menu="OtherSettings"
@@ -52,7 +52,7 @@ Author="&author;"
 Title="GClone Plugin"
 ---
 <?php
-include_once "/usr/local/emhttp/plugins/&name;/gclone-plugin.php";
+include_once "/usr/local/emhttp/plugins/&name;/gclone-plugin-backend.php";
 ?>
 ]]>
 </INLINE>
