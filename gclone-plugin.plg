@@ -3,7 +3,7 @@
 <!ENTITY name "gclone-plugin">
 <!ENTITY author "unbekannt1753">
 <!ENTITY version "2023.07.31">
-<!ENTITY md5 "">
+<!ENTITY md5 "d5bb80c5d403252f70809976cbb5e9d4">
 <!ENTITY launch "Settings/GclonePlugin">
 <!ENTITY plugdir "/usr/local/emhttp/plugins/&name;">
 <!ENTITY github "unbekannt1753/gclone-unraid">

@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GClone Plugin Configuration</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+        }
+        form {
+            margin-top: 20px;
+        }
+        label {
+            display: block;
+            margin-top: 10px;
+        }
+        input[type="text"], textarea {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .mount-config {
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 4px;
+        }
+        .browse-button {
+            background-color: #008CBA;
+            margin-left: 10px;
+        }
+        .browse-button:hover {
+            background-color: #007B9A;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>GClone Plugin Configuration</h1>
+        <form id="gcloneForm">
+            <div id="mounts">
+                <!-- Mount configurations will be added here dynamically -->
+            </div>
+            <button type="button" onclick="addMount()">Add Mount</button>
+            <button type="submit">Save Configuration</button>
+        </form>
+    </div>
+
+    <script>
+        let mountCount = 0;
+
+        function addMount() {
+            mountCount++;
+            const mountDiv = document.createElement('div');
+            mountDiv.className = 'mount-config';
+            mountDiv.innerHTML = `
+                <h3>Mount ${mountCount}</h3>
+                <label for="driveName${mountCount}">Drive Name:</label>
+                <input type="text" id="driveName${mountCount}" name="driveName${mountCount}" required>
+                
+                <label for="clientId${mountCount}">Client ID:</label>
+                <input type="text" id="clientId${mountCount}" name="clientId${mountCount}" required>
+                
+                <label for="clientSecret${mountCount}">Client Secret:</label>
+                <input type="text" id="clientSecret${mountCount}" name="clientSecret${mountCount}" required>
+                
+                <label for="refreshToken${mountCount}">Refresh Token:</label>
+                <input type="text" id="refreshToken${mountCount}" name="refreshToken${mountCount}" required>
+                
+                <label for="teamDriveId${mountCount}">Team Drive ID (optional):</label>
+                <input type="text" id="teamDriveId${mountCount}" name="teamDriveId${mountCount}">
+                
+                <label for="mountPoint${mountCount}">Mount Point:</label>
+                <input type="text" id="mountPoint${mountCount}" name="mountPoint${mountCount}" required>
+                
+                <label for="saFolder${mountCount}">Service Account Folder:</label>
+                <input type="text" id="saFolder${mountCount}" name="saFolder${mountCount}">
+                <button type="button" class="browse-button" onclick="browse('saFolder${mountCount}')">Browse</button>
+                
+                <label for="saFile${mountCount}">Service Account File:</label>
+                <input type="text" id="saFile${mountCount}" name="saFile${mountCount}">
+                <button type="button" class="browse-button" onclick="browse('saFile${mountCount}')">Browse</button>
+            `;
+            document.getElementById('mounts').appendChild(mountDiv);
+        }
+
+        function browse(inputId) {
+            // This function will be implemented in PHP to allow browsing the Unraid server
+            alert('Browse functionality will be implemented server-side');
+        }
+
+        document.getElementById('gcloneForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            const config = {};
+            for (let [key, value] of formData.entries()) {
+                config[key] = value;
+            }
+            console.log('Configuration:', config);
+            // Here you would typically send this data to your backend
+            alert('Configuration saved! (This is a placeholder - actual saving not implemented yet)');
+        });
+
+        // Add the first mount by default
+        addMount();
+        
+        document.getElementById('gcloneForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+        
+        fetch('gclone-plugin-backend.php', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert(data.message);
+            } else {
+                alert('Errors occurred:\n' + data.errors.join('\n'));
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while processing your request.');
+        });
+    });
+    </script>
+</body>
+</html>
