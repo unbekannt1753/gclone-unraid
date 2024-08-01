@@ -1,4 +1,4 @@
-<?xml version="1.0" standalone="yes"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE PLUGIN [
 <!ENTITY name "gclone-plugin">
 <!ENTITY author "unbekannt1753">
@@ -10,7 +10,7 @@
 <!ENTITY pluginURL "https://raw.githubusercontent.com/&github;/main/&name;.plg">
 ]>
 
-<PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.9.0" support="https://forums.unraid.net/topic/YOUR-SUPPORT-THREAD/">
+<PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.9.0" support="https://forums.unraid.net/topic/plugin-support-thread">
 
 <CHANGES>
 ###2023.07.31
