@@ -27,6 +27,7 @@
 rm -f $(ls /boot/config/plugins/&name;/&name;*.txz 2>/dev/null | grep -v '&version;')
 </INLINE>
 </FILE>
+<<<<<<< HEAD
 
 <FILE Name="&source;" Run="upgradepkg --install-new">
 <URL>https://raw.githubusercontent.com/&github;/master/archive/&name;-&version;.txz</URL>
@@ -70,3 +71,6 @@ echo ""
 </FILE>
 
 </PLUGIN>
+=======
+</PLUGIN>
+>>>>>>> fa7eba7bf253470057cc2ca60ede609610527198
