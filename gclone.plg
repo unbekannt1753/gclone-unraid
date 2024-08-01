@@ -1,0 +1,196 @@
+# File: gclone.plg
+<?xml version='1.0' standalone='yes'?>
+<!DOCTYPE PLUGIN [
+<!ENTITY name      "gclone">
+<!ENTITY author    "Gerardo Castro">
+<!ENTITY version   "2023.07.31">
+<!ENTITY launch    "Settings/gclone">
+<!ENTITY gitURL    "https://raw.githubusercontent.com/&author;/unraid-gclone/master">
+<!ENTITY pluginURL "&gitURL;/&name;.plg">
+<!ENTITY pkgURL    "&gitURL;/&name;-&version;-x86_64-1.txz">
+<!ENTITY plgPATH   "/boot/config/plugins/&name;">
+<!ENTITY plgNAME   "&name;-&version;-x86_64-1">
+<!ENTITY emhttp    "/usr/local/emhttp/plugins/&name;">
+]>
+
+<PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;">
+
+<CHANGES>
+###2023.07.31
+- Initial release
+</CHANGES>
+
+<FILE Run="/bin/bash">
+<INLINE>
+# Remove old plugin files
+rm -rf &plgPATH;/*
+
+# Remove old 'source' files
+rm -rf &plgPATH;/&name;-*
+
+# Remove old 'package' file
+rm -f &plgPATH;/&plgNAME;.txz
+
+# Create plugin folder
+mkdir -p &plgPATH;
+
+# Download package
+download() {
+  local URL=$1
+  echo "+==============================================================+"
+  echo "| Downloading package: $URL"
+  echo "+==============================================================+"
+  wget -q --no-check-certificate -O "&plgPATH;/&plgNAME;.txz" "$URL"
+}
+
+download "&pkgURL;"
+
+if [ ! -f "&plgPATH;/&plgNAME;.txz" ]; then
+  echo "There was a problem downloading the package file."
+  exit 1
+fi
+
+# Install the 'package'
+installpkg "&plgPATH;/&plgNAME;.txz"
+
+# Cleaning up
+rm -f &plgPATH;/*.txz
+rm -rf &emhttp;
+
+echo ""
+echo "-----------------------------------------------------------"
+echo " &name; has been installed."
+echo " Version: &version;"
+echo "-----------------------------------------------------------"
+echo ""
+</INLINE>
+</FILE>
+
+<FILE Run="/bin/bash" Method="remove">
+<INLINE>
+removepkg &plgNAME;
+rm -rf &emhttp;
+rm -rf &plgPATH;
+echo ""
+echo "-----------------------------------------------------------"
+echo " &name; has been removed."
+echo " Version: &version;"
+echo "-----------------------------------------------------------"
+echo ""
+</INLINE>
+</FILE>
+
+</PLUGIN>
+
+# File: gclone.xml
+<?xml version="1.0" encoding="utf-8"?>
+<Containers>
+  <Plugin>gclone</Plugin>
+  <PluginURL>https://raw.githubusercontent.com/YourName/unraid-gclone/master/gclone.plg</PluginURL>
+  <PluginAuthor>YourName</PluginAuthor>
+  <Beta>False</Beta>
+  <Category>Tools:Backup</Category>
+  <Name>gclone</Name>
+  <Description>
+    gclone is a tool for syncing files and directories to and from various cloud storage providers.
+  </Description>
+  <Support>https://github.com/YourName/unraid-gclone</Support>
+  <Icon>https://raw.githubusercontent.com/YourName/unraid-gclone/master/gclone.png</Icon>
+  <Date>2023-07-31</Date>
+  <Changes>
+    Initial release
+  </Changes>
+</Containers>
+
+# File: install.sh
+#!/bin/bash
+
+# Unraid GClone Plugin Installation Script
+
+set -o errexit
+set -o pipefail
+set -o nounset
+
+if [[ $(id -u) -ne 0 ]]; then
+    echo "This script must be run as root" 
+    exit 1
+fi
+
+# Set variables
+INSTALL_DIR="/usr/local/bin"
+PLUGIN_DIR="/boot/config/plugins/gclone-plugin"
+CLDBIN="${INSTALL_DIR}/gclone"
+TEMP_FILE="/tmp/gclone_temp"
+
+# Determine OS architecture
+OSARCH=$(uname -m)
+case $OSARCH in 
+    x86_64)
+        BINTAG=Linux_x86_64
+        ;;
+    i*86)
+        BINTAG=Linux_i386
+        ;;
+    aarch64)
+        BINTAG=Linux_arm64
+        ;;
+    arm*)
+        BINTAG=Linux_armv6
+        ;;
+    *)
+        echo "Unsupported OSARCH: $OSARCH"
+        exit 1
+        ;;
+esac
+
+# Create plugin directory if it doesn't exist
+mkdir -p "$PLUGIN_DIR"
+
+# Download and install gclone
+echo "Downloading gclone..."
+wget -qO- https://api.github.com/repos/donwa/gclone/releases/latest \
+| grep browser_download_url | grep "$BINTAG" | cut -d '"' -f 4 \
+| wget --no-verbose -i- -O- | gzip -d -c > "$TEMP_FILE"
+
+# Move the temporary file to the final location
+mv "$TEMP_FILE" "$CLDBIN"
+
+# Make gclone executable
+chmod +x "$CLDBIN"
+
+# Create a symlink to ensure gclone is in PATH
+ln -sf "$CLDBIN" /usr/bin/gclone
+
+# Create a startup script to ensure gclone persists after reboot
+cat << EOF > "$PLUGIN_DIR/gclone_startup.sh"
+#!/bin/bash
+# This script runs at Unraid startup to ensure gclone is installed and accessible
+
+if [ ! -f "$CLDBIN" ]; then
+    echo "gclone not found, reinstalling..."
+    /bin/bash "$PLUGIN_DIR/install.sh"
+fi
+
+# Ensure symlink exists
+ln -sf "$CLDBIN" /usr/bin/gclone
+EOF
+
+chmod +x "$PLUGIN_DIR/gclone_startup.sh"
+
+# Add startup script to Unraid's user scripts
+if [ ! -f "/boot/config/plugins/user.scripts/scripts/gclone_startup" ]; then
+    mkdir -p "/boot/config/plugins/user.scripts/scripts/gclone_startup"
+    echo '#!/bin/bash' > "/boot/config/plugins/user.scripts/scripts/gclone_startup/script"
+    echo "$PLUGIN_DIR/gclone_startup.sh" >> "/boot/config/plugins/user.scripts/scripts/gclone_startup/script"
+    chmod +x "/boot/config/plugins/user.scripts/scripts/gclone_startup/script"
+fi
+
+echo "GClone installation complete!"
+
+# Test gclone installation
+if gclone version; then
+    echo "GClone installed successfully!"
+else
+    echo "Error: GClone installation failed. Please check the logs and try again."
+    exit 1
+fi

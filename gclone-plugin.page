@@ -1,0 +1,90 @@
+<?php
+$plugin = "gclone-plugin";
+$docroot = $docroot ?? $_SERVER['DOCUMENT_ROOT'] ?: '/usr/local/emhttp';
+$urlpath = $urlpath ?? $_GET['v'];
+require_once "$docroot/webGui/include/Helpers.php";
+require_once "$docroot/plugins/$plugin/include/Helpers.php";
+
+// Function to browse directories on the Unraid server
+function browse_directory($dir = '/') {
+    $files = scandir($dir);
+    $result = [];
+    foreach ($files as $file) {
+        if ($file != "." && $file != "..") {
+            $path = $dir . '/' . $file;
+            $result[] = [
+                'name' => $file,
+                'path' => $path,
+                'type' => is_dir($path) ? 'dir' : 'file'
+            ];
+        }
+    }
+    return $result;
+}
+
+// Handle AJAX requests for browsing
+if (isset($_GET['action']) && $_GET['action'] == 'browse') {
+    $dir = $_GET['dir'] ?? '/';
+    echo json_encode(browse_directory($dir));
+    exit;
+}
+
+// Load the HTML content
+$html_content = file_get_contents("$docroot/plugins/$plugin/webui.html");
+
+// Add PHP logic for browsing functionality
+$browse_script = <<<EOT
+<script>
+function browse(inputId) {
+    const currentPath = document.getElementById(inputId).value || '/';
+    fetch(`?action=browse&dir=\${encodeURIComponent(currentPath)}`)
+        .then(response => response.json())
+        .then(data => {
+            const fileList = data.map(item => `
+                <div>
+                    <span>\${item.name}</span>
+                    <button onclick="selectPath('${inputId}', '\${item.path}')">\${item.type === 'dir' ? 'Open' : 'Select'}</button>
+                </div>
+            `).join('');
+            
+            const modal = document.createElement('div');
+            modal.style.position = 'fixed';
+            modal.style.left = '0';
+            modal.style.top = '0';
+            modal.style.width = '100%';
+            modal.style.height = '100%';
+            modal.style.backgroundColor = 'rgba(0,0,0,0.5)';
+            modal.style.display = 'flex';
+            modal.style.justifyContent = 'center';
+            modal.style.alignItems = 'center';
+            
+            const content = document.createElement('div');
+            content.style.backgroundColor = 'white';
+            content.style.padding = '20px';
+            content.style.borderRadius = '5px';
+            content.innerHTML = `
+                <h3>Select a file or directory</h3>
+                \${fileList}
+                <button onclick="this.closest('div').remove()">Close</button>
+            `;
+            
+            modal.appendChild(content);
+            document.body.appendChild(modal);
+        });
+}
+
+function selectPath(inputId, path) {
+    document.getElementById(inputId).value = path;
+    if (path.endsWith('/')) {
+        browse(inputId);
+    }
+}
+</script>
+EOT;
+
+// Insert the browse script just before the closing </body> tag
+$html_content = str_replace('</body>', $browse_script . '</body>', $html_content);
+
+// Output the modified HTML content
+echo $html_content;
+?>
